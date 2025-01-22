@@ -11,6 +11,7 @@ The `Wigl Sms Package` provides an easy-to-use service for sending SMS verificat
     - [Using Options and Signals](#using-options-and-signals)
 - [Customization](#customization)
 - [Error Handling](#error-handling)
+- [Testing](#testing)
 
 ## Installation
 
@@ -125,6 +126,22 @@ You can also handle specific errors using a custom error handler. The formatErro
 
 ```php
 Log::channel('sms_mode')->error('Error: ' . $errorMessage);
+```
+
+## Testing
+
+To run the tests for this package, follow these steps:
+
+### 1. Set Up PHPUnit
+
+Ensure that PHPUnit is installed and configured in your project. If it's not already installed, you can install it by running:
+
+```bash
+composer require --dev phpunit/phpunit ^11.5
+```
+### 2. Run PHPUnit
+```bash
+vendor/bin/phpunit
 ```
 
 ## Changelog
