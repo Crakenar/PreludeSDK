@@ -35,13 +35,13 @@ class SmsService implements SmsServiceInterface
         $this->client = $client;
     }
 
-    public function sendVerification(string $userPhoneNumber): bool
+    public function sendVerification(string $userPhoneNumber, CreateVerificationOptions $options): bool
     {
 //        if ($this->off) {
 //            return true;
 //        }
         try {
-            $responseContent = json_decode($this->createVerificationRequest($userPhoneNumber)->getBody()->getContents());
+            $responseContent = json_decode($this->createVerificationRequest($userPhoneNumber, $options)->getBody()->getContents());
             //If id then it means a session is opened on Prelude side for this phone number => success
             if ($responseContent->id) {
                 Log::channel('sms_mode')->info('SMS successfully dispatched to ' . $userPhoneNumber);
