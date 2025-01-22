@@ -52,6 +52,15 @@ interface SmsServiceInterface
     public function sendVerification(string $userPhoneNumber, CreateVerificationOptions $options): SmsPackageResponse;
 
     /**
+     * Send a verification check code request to the API to validate the provided phone number and code.
+     *
+     * @param string $userPhoneNumber The phone number to send the SMS.
+     * @param string $code
+     * @return SmsPackageResponse
+     */
+    public function sendVerificationCheckCode(string $userPhoneNumber, string $code): SmsPackageResponse;
+
+    /**
      * Formats an error response for Prelude API errors.
      *
      * @param string $errorCode The specific error code.

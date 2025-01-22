@@ -9,6 +9,8 @@ use Psr\Http\Message\ResponseInterface;
 use Wigl\WiglSmsPackage\Contracts\SmsServiceInterface;
 use Wigl\WiglSmsPackage\DTO\CreateVerificationOptions;
 use Wigl\WiglSmsPackage\DTO\SmsPackageResponse;
+use Wigl\WiglSmsPackage\Enums\VerificationCheckCodeRequestStatus;
+use Wigl\WiglSmsPackage\Enums\VerificationRequestStatus;
 use Wigl\WiglSmsPackage\Utility\PhoneNumberValidator;
 
 class SmsService implements SmsServiceInterface
@@ -74,11 +76,52 @@ class SmsService implements SmsServiceInterface
         }
         try {
             $responseContent = json_decode($this->createVerificationRequest($userPhoneNumber, $options)->getBody()->getContents());
-            if ($responseContent->id) {
+            if ($responseContent->id && $responseContent->status === VerificationRequestStatus::SUCCESS) {
                 Log::channel('sms_mode')->info('SMS successfully dispatched to ' . $userPhoneNumber);
                 return new SmsPackageResponse();
             }
 
+            return $this->handleApiException($userPhoneNumber);
+
+        } catch (GuzzleException $exception) {
+            return $this->handleApiException($userPhoneNumber, $exception);
+        }
+    }
+
+    /**
+     * Send a verification check code request to the API to validate the provided phone number and code.
+     *
+     * This method checks the provided phone number and code for validity. If the phone number is not in
+     * valid E.164 format or the code is empty, an error response is returned. It then attempts to send the
+     * verification check code request to an external API. If the response is successful, a success response
+     * is returned. Otherwise, an API error is handled and returned.
+     *
+     * @param string $userPhoneNumber The phone number to validate in E.164 format (e.g., "+1234567890").
+     * @param string $code The verification code cannot be empty. The format + expiration time is  managed by the API.
+     *
+     * @return SmsPackageResponse The result of the SMS verification check request, which can either be
+     *         a successful response or an error response with relevant error messages.
+     *
+     */
+    public function sendVerificationCheckCode(string $userPhoneNumber, string $code): SmsPackageResponse
+    {
+//        if ($this->isServiceEnabled) {
+//            return true;
+//        }
+        if (!PhoneNumberValidator::isValidE164($userPhoneNumber)) {
+            $errorsFormatted = $this->formatError($this->errorCodes['invalid_phone_number'], 'Invalid phone number');
+            return new SmsPackageResponse(false, $errorsFormatted);
+        }
+        if (empty($code)) {
+            $errorsFormatted = $this->formatError($this->errorCodes['code_empty'], 'No code provided');
+            return new SmsPackageResponse(false, $errorsFormatted);
+        }
+        try {
+            $responseContent = json_decode($this->createVerificationCheckCodeRequest($userPhoneNumber, $code)->getBody()->getContents());
+            if ($responseContent->id && $responseContent->status === VerificationCheckCodeRequestStatus::SUCCESS) {
+                Log::channel('sms_mode')->info('SMS Code validated successfully for ' . $userPhoneNumber);
+                return new SmsPackageResponse();
+            }
             return $this->handleApiException($userPhoneNumber);
 
         } catch (GuzzleException $exception) {
@@ -108,8 +151,34 @@ class SmsService implements SmsServiceInterface
                         'value' => $phoneNumber,
                     ],
                 ],
-                $options->toArray() // Merge in options and signals
+                $options->toArray()
             ),
+        ]);
+    }
+
+    /**
+     * Sends a request to verify the provided code for a phone number.
+     *
+     * @param string $phoneNumber The phone number in E.164 format to verify.
+     * @param string $code The verification code to check against the provided phone number.
+     * @return ResponseInterface|string The response from the external service.
+     *         This could either be a response object or an error message string if the request fails.
+     * @throws GuzzleException If there is an error during the HTTP request (e.g., connection failure, timeout, see constants.php).
+     */
+    public function createVerificationCheckCodeRequest(string $phoneNumber, string $code): ResponseInterface|string
+    {
+        return $this->client->post(self::URL_V2 . '/verification/check', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ],
+            'json' => [
+                    'target' => [
+                        'type' => 'phone_number',
+                        'value' => $phoneNumber,
+                    ],
+                    'code' => $code
+                ],
         ]);
     }
 

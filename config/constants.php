@@ -34,6 +34,7 @@ return [
         'premature_retry' => 'sms-service-0290',
         'spending_limit_exceeded' => 'sms-service-0300',
         'custom_code_not_allowed' => 'sms-service-0310',
+        'code_empty' => 'sms-service-0320',
     ],
 ];
 
