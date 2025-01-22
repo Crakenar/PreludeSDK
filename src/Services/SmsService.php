@@ -76,7 +76,7 @@ class SmsService implements SmsServiceInterface
         }
         try {
             $responseContent = json_decode($this->createVerificationRequest($userPhoneNumber, $options)->getBody()->getContents());
-            if ($responseContent->id && $responseContent->status === VerificationRequestStatus::SUCCESS) {
+            if ($responseContent->id && in_array($responseContent->status, [VerificationRequestStatus::SUCCESS->value, VerificationRequestStatus::RETRY->value])) {
                 Log::channel('sms_mode')->info('SMS successfully dispatched to ' . $userPhoneNumber);
                 return new SmsPackageResponse();
             }
@@ -118,7 +118,7 @@ class SmsService implements SmsServiceInterface
         }
         try {
             $responseContent = json_decode($this->createVerificationCheckCodeRequest($userPhoneNumber, $code)->getBody()->getContents());
-            if ($responseContent->id && $responseContent->status === VerificationCheckCodeRequestStatus::SUCCESS) {
+            if ($responseContent->id && $responseContent->status === VerificationCheckCodeRequestStatus::SUCCESS->value) {
                 Log::channel('sms_mode')->info('SMS Code validated successfully for ' . $userPhoneNumber);
                 return new SmsPackageResponse();
             }
