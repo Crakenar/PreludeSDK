@@ -22,7 +22,7 @@ interface PackageResponseInterface
     /**
      * Get a list of errors associated with the response.
      *
-     * @return array Returns an array of error details.
+     * @return array<string, string> Returns an array of error details.
      *               Each error typically includes a code and message.
      */
     public function getErrors(): array;

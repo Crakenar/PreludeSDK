@@ -44,7 +44,7 @@ Once the package is installed, you can publish the config file to your applicati
 ```bash
 php artisan vendor:publish --provider="Wigl\WiglSmsPackage\WiglSmsPackageServiceProvider" --tag="config"
 ```
-This will publish the configuration file config/wigl_sms.php.
+This will publish the configuration file config/services.php.
 
 ### Step 2: Configure API Key and Other Settings
 Open the config/services.php file and update the API key and other options:

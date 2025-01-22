@@ -60,7 +60,6 @@ class SmsService implements SmsServiceInterface
         } catch (GuzzleException $exception) {
             $response = $exception->getResponse();
             $responseBody = json_decode($response->getBody()->getContents(), true);
-            dd($responseBody);
             $errorCode = $responseBody['code'] ?? 'generic';
 
             Log::channel('sms_mode')->error('Error with Prelude API request: ' . $exception->getMessage());
