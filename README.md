@@ -191,8 +191,11 @@ composer require --dev phpunit/phpunit ^11.5
 vendor/bin/phpunit
 ```
 
-## Changelog
-### Version 1.0.0
+## Todo
+- Implement additional `error handling` for specific API error codes.
+- Implement `webhooks`.
+- Add more unit and feature `tests` for SMS verification and edge cases.
+
 ## Changelog
 
 ### Version 1.0.0
