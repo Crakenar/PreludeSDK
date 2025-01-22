@@ -18,27 +18,47 @@ class SmsService implements SmsServiceInterface
     private mixed $errorCodes;
     private Client $client;
 
-    //todo use config php
     private const string URL_V2 = "https://api.prelude.dev/v2";
 
-    public function __construct()
-    {
-        //Default SMS Service CONFIG
-        $this->errorCodes = config('constants.sms_error_codes');
-        $this->isServiceEnabled = config('services.sms_service.service_activated') || app()->env === 'testing';
-        $this->apiKey = config('services.sms_service.api_key');
+    public function __construct(
+        string|null $apiKey = null,
+        bool $isServiceEnabled = null,
+        mixed $errorCodes = null
+    ) {
+        $this->apiKey = $apiKey ?? config('services.sms_service.api_key');
+        $this->isServiceEnabled = $isServiceEnabled ?? (config('services.sms_service.service_activated') || app()->env === 'testing');
+        $this->errorCodes = $errorCodes ?? config('constants.sms_error_codes');
         $this->client = new Client();
     }
 
+    public function setApiKey(string|null $apiKey): self
+    {
+        $this->apiKey = $apiKey;
+        return $this;
+    }
+
+    public function setIsServiceEnabled(bool $isServiceEnabled): self
+    {
+        $this->isServiceEnabled = $isServiceEnabled;
+        return $this;
+    }
+
+    public function setErrorCodes(mixed $errorCodes): self
+    {
+        $this->errorCodes = $errorCodes;
+        return $this;
+    }
+
     // Setter for the client (for testing purposes)
-    public function setClient(Client $client): void
+    public function setClient(Client $client): self
     {
         $this->client = $client;
+        return $this;
     }
 
     /**
      * Sends a verification SMS to a user's phone number.
-     * GuzzleException: Expect a code, message, doc_url => https://docs.prelude.so/api-reference/v2/errors
+     * GuzzleException Body: Expect a code, message, doc_url => https://docs.prelude.so/api-reference/v2/errors
      * @param string $userPhoneNumber The phone number to send the SMS.
      * @param CreateVerificationOptions $options
      * @return SmsPackageResponse
@@ -58,18 +78,11 @@ class SmsService implements SmsServiceInterface
                 Log::channel('sms_mode')->info('SMS successfully dispatched to ' . $userPhoneNumber);
                 return new SmsPackageResponse();
             }
-            Log::channel('sms_mode')->error('Error with Prelude API request. Returned : ' . $responseContent);
-            $errorsFormatted = $this->formatError($this->errorCodes['generic'], 'Error with trying to send an sms to ' . $userPhoneNumber);
-            return new SmsPackageResponse(false, $errorsFormatted);
+
+            return $this->handleApiException($userPhoneNumber);
 
         } catch (GuzzleException $exception) {
-            $response = $exception->getResponse();
-            $responseBody = json_decode($response->getBody()->getContents(), true);
-            $errorCode = $responseBody['code'] ?? 'generic';
-
-            Log::channel('sms_mode')->error('Error with Prelude API request: ' . $responseBody['message']);
-            $errorsFormatted = $this->formatError($errorCode, $responseBody['message']);
-            return new SmsPackageResponse(false, $errorsFormatted);
+            return $this->handleApiException($userPhoneNumber, $exception);
         }
     }
 
@@ -103,7 +116,7 @@ class SmsService implements SmsServiceInterface
     /**
      * Formats an error response for Prelude API errors.
      *
-     * @param string $errorCode The specific error code.
+     * @param string $errorCode The specific error code. invalid_phone_number, generic...
      * @param string|null $message Additional error message details.
      * @return array Formatted error data.
      */
@@ -113,5 +126,33 @@ class SmsService implements SmsServiceInterface
             'error_code' => $this->errorCodes[$errorCode] ?? 'Unknown error code.',
             'message' => $message,
         ];
+    }
+
+    /**
+     * Handles exceptions by logging error details and returning a formatted SMS package response.
+     * Either in case of an exception or when no id is returned from the api.
+     *
+     * @param GuzzleException|null $exception The exception to be handled. If no exception, a default error is used.
+     * @param string $userPhoneNumber The phone number to be included in the error message when no exception is provided. Optional.
+     * @return SmsPackageResponse Returns an instance of `SmsPackageResponse` with `success` set to false and the formatted error details.
+     *
+     */
+    public function handleApiException(string $userPhoneNumber, ?GuzzleException $exception = null): SmsPackageResponse
+    {
+        $errorMessage = 'Error with Prelude API request.';
+        $errorCode = 'generic';
+
+        if (isset($exception)) {
+            $response = $exception->getResponse();
+            $responseBody = json_decode($response->getBody()->getContents(), true);
+            $errorCode = $responseBody['code'] ?? $errorCode;
+            $errorMessage = $responseBody['message'] ?? $errorMessage;
+        } else {
+            $errorMessage = 'Error with trying to send an sms to ' . $userPhoneNumber;
+        }
+
+        Log::channel('sms_mode')->error($errorMessage);
+        $errorsFormatted = $this->formatError($errorCode, $errorMessage);
+        return new SmsPackageResponse(false, $errorsFormatted);
     }
 }

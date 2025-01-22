@@ -2,11 +2,46 @@
 
 namespace Wigl\WiglSmsPackage\Contracts;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Wigl\WiglSmsPackage\DTO\CreateVerificationOptions;
 use Wigl\WiglSmsPackage\DTO\SmsPackageResponse;
 
 interface SmsServiceInterface
 {
+
+    /**
+     * Set the API key for the SMS service.
+     *
+     * @param Client $client
+     * @return self
+     */
+    public function setClient(Client $client): self;
+
+    /**
+     * Set the API key for the SMS service.
+     *
+     * @param string|null $apiKey
+     * @return self
+     */
+    public function setApiKey(string|null $apiKey): self;
+
+    /**
+     * Set whether the SMS service is enabled.
+     *
+     * @param bool $isServiceEnabled
+     * @return self
+     */
+    public function setIsServiceEnabled(bool $isServiceEnabled): self;
+
+    /**
+     * Set the error codes configuration.
+     *
+     * @param mixed $errorCodes
+     * @return self
+     */
+    public function setErrorCodes(mixed $errorCodes): self;
+
     /**
      * Sends a verification SMS to a user's phone number.
      *
@@ -24,4 +59,12 @@ interface SmsServiceInterface
      * @return array Formatted error data.
      */
     public function formatError(string $errorCode, ?string $message = null): array;
+
+    /**
+     * Handles exceptions by logging error details and returning a formatted SMS package response.
+     * @param string $userPhoneNumber
+     * @param GuzzleException|null $exception
+     * @return SmsPackageResponse
+     */
+    public function handleApiException(string $userPhoneNumber, GuzzleException $exception = null): SmsPackageResponse;
 }
