@@ -15,7 +15,7 @@ class SmsService implements SmsServiceInterface
     private string|null $apiKey;
     private bool $isServiceEnabled;
     private array $errorCodes;
-    private Client $httpClient;
+    private Client $client;
 
     //todo use config php
     private const string URL_V2 = "https://api.prelude.dev/v2";
@@ -26,6 +26,13 @@ class SmsService implements SmsServiceInterface
 //        $this->ERROR_CODES = config('constants.prelude_error_codes');
         $this->off = config('services.sms_service.service_activated') || app()->env === 'testing';
         $this->apiKey = config('services.sms_service.api_key');
+        $this->client = new Client();
+    }
+
+    // Setter for the client (for testing purposes)
+    public function setClient(Client $client): void
+    {
+        $this->client = $client;
     }
 
     public function sendVerification(string $userPhoneNumber): bool
@@ -71,10 +78,9 @@ class SmsService implements SmsServiceInterface
      * @return ResponseInterface|string
      * @throws GuzzleException
      */
-    private function createVerificationRequest(string $phoneNumber, CreateVerificationOptions $options): ResponseInterface|string
+    public function createVerificationRequest(string $phoneNumber, CreateVerificationOptions $options): ResponseInterface|string
     {
-        $client = new Client();
-        return $client->post(self::URL_V2 . '/verification', [
+        return $this->client->post(self::URL_V2 . '/verification', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
