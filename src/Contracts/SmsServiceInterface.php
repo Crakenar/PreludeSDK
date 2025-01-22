@@ -1,8 +1,9 @@
 <?php
 
-namespace Wigl\WiglSmsPackage\interface;
+namespace Wigl\WiglSmsPackage\Contracts;
 
-use Wigl\WiglSmsPackage\dto\CreateVerificationOptions;
+use Wigl\WiglSmsPackage\DTO\CreateVerificationOptions;
+use Wigl\WiglSmsPackage\DTO\SmsPackageResponse;
 
 interface SmsServiceInterface
 {
@@ -11,9 +12,9 @@ interface SmsServiceInterface
      *
      * @param string $userPhoneNumber The phone number to send the SMS.
      * @param CreateVerificationOptions $options Optional configuration that helps prelude with client language and anti-fraud.
-     * @return bool True if successful, false otherwise.
+     * @return SmsPackageResponse
      */
-    public function sendVerification(string $userPhoneNumber, CreateVerificationOptions $options): bool;
+    public function sendVerification(string $userPhoneNumber, CreateVerificationOptions $options): SmsPackageResponse;
 
     /**
      * Formats an error response for Prelude API errors.

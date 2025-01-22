@@ -1,20 +1,20 @@
 <?php
 
-namespace Wigl\WiglSmsPackage\service;
+namespace Wigl\WiglSmsPackage\Services;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface;
-use Wigl\WiglSmsPackage\dto\CreateVerificationOptions;
-use Wigl\WiglSmsPackage\interface\SmsServiceInterface;
+use Wigl\WiglSmsPackage\Contracts\SmsServiceInterface;
+use Wigl\WiglSmsPackage\DTO\CreateVerificationOptions;
+use Wigl\WiglSmsPackage\DTO\SmsPackageResponse;
 
 class SmsService implements SmsServiceInterface
 {
-    protected bool $off = false;
     private string|null $apiKey;
-    private bool $isServiceEnabled;
-    private array $errorCodes;
+    private bool $isServiceEnabled = false;
+    private mixed $errorCodes;
     private Client $client;
 
     //todo use config php
@@ -23,8 +23,8 @@ class SmsService implements SmsServiceInterface
     public function __construct()
     {
         //Default SMS Service CONFIG
-//        $this->ERROR_CODES = config('constants.prelude_error_codes');
-        $this->off = config('services.sms_service.service_activated') || app()->env === 'testing';
+        $this->errorCodes = config('error-constants.sms_error_codes');
+        $this->isServiceEnabled = config('services.sms_service.service_activated') || app()->env === 'testing';
         $this->apiKey = config('services.sms_service.api_key');
         $this->client = new Client();
     }
@@ -35,46 +35,45 @@ class SmsService implements SmsServiceInterface
         $this->client = $client;
     }
 
-    public function sendVerification(string $userPhoneNumber, CreateVerificationOptions $options): bool
+    /**
+     * Sends a verification SMS to a user's phone number.
+     * GuzzleException: Expect a code, message, doc_url => https://docs.prelude.so/api-reference/v2/errors
+     * @param string $userPhoneNumber The phone number to send the SMS.
+     * @param CreateVerificationOptions $options
+     * @return SmsPackageResponse
+     */
+    public function sendVerification(string $userPhoneNumber, CreateVerificationOptions $options): SmsPackageResponse
     {
-//        if ($this->off) {
+//        if ($this->isServiceEnabled) {
 //            return true;
 //        }
         try {
             $responseContent = json_decode($this->createVerificationRequest($userPhoneNumber, $options)->getBody()->getContents());
-            //If id then it means a session is opened on Prelude side for this phone number => success
             if ($responseContent->id) {
                 Log::channel('sms_mode')->info('SMS successfully dispatched to ' . $userPhoneNumber);
-                return true;
+                return new SmsPackageResponse();
             }
-//            $this->verifyPreludeSmsCode($appUserId);
-            Log::channel('sms_mode')->error('Error with smsmode API request. Returned : ' . $responseContent);
-            return false;
-        } catch (\Exception $e) {
-            dd($e);
-            // expect a code, message, doc_url
-            Log::channel('sms_mode')->error('Error with smsmode API request: ' . $exception->getMessage());
+            Log::channel('sms_mode')->error('Error with Prelude API request. Returned : ' . $responseContent);
+            $errorsFormatted = $this->formatError($this->errorCodes['generic'], 'Error with trying to send an sms to ' . $userPhoneNumber);
+            return new SmsPackageResponse(false, $errorsFormatted);
 
-            $this->formatPreludeError('account_invalid', $e->getMessage());
-            return false;
         } catch (GuzzleException $exception) {
-            dd($exception);
-            Log::channel('sms_mode')->error('Error with smsmode API request: ' . $exception->getMessage());
-            // expect a code, message, doc_url
-            $this->formatError('account_invalid', $exception->getMessage());
-            return false;
+            $response = $exception->getResponse();
+            $responseBody = json_decode($response->getBody()->getContents(), true);
+            dd($responseBody);
+            $errorCode = $responseBody['code'] ?? 'generic';
+
+            Log::channel('sms_mode')->error('Error with Prelude API request: ' . $exception->getMessage());
+            $errorsFormatted = $this->formatError($errorCode, $exception->getMessage());
+            return new SmsPackageResponse(false, $errorsFormatted);
         }
     }
 
     /**
-     * This function use the Prelude API to send an SMS code to a phone number. A Session is created with the code / phone number on Prelude side
-     * Atm we do not need to use a check code function because we have an api route ?? => ask Julien
-     * @throws GuzzleException
-     */
-    /**
      * Creates a verification request to the Prelude API.
      *
      * @param string $phoneNumber The recipient's phone number.
+     * @param CreateVerificationOptions $options
      * @return ResponseInterface|string
      * @throws GuzzleException
      */

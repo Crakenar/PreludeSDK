@@ -3,7 +3,7 @@
 namespace Wigl\WiglSmsPackage;
 
 use Illuminate\Support\ServiceProvider;
-use Wigl\WiglSmsPackage\service\SmsService;
+use Wigl\WiglSmsPackage\Services\SmsService;
 
 class SmsServiceProvider extends ServiceProvider
 {

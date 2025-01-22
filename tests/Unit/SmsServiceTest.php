@@ -8,8 +8,8 @@ use Mockery;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Tests\TestCase;
-use Wigl\WiglSmsPackage\dto\CreateVerificationOptions;
-use Wigl\WiglSmsPackage\service\SmsService;
+use Wigl\WiglSmsPackage\DTO\CreateVerificationOptions;
+use Wigl\WiglSmsPackage\Services\SmsService;
 
 class SmsServiceTest extends TestCase
 {
@@ -26,7 +26,6 @@ class SmsServiceTest extends TestCase
             ->shouldReceive('get')
             ->with('services.sms_service.service_activated', null)
             ->andReturn(true);
-
     }
 
     protected function tearDown(): void

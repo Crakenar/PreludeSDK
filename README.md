@@ -4,6 +4,7 @@ The `Wigl Sms Package` provides an easy-to-use service for sending SMS verificat
 
 ## Table of Contents
 
+- [Package Structure](#package-structure)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Usage](#usage)
@@ -12,6 +13,19 @@ The `Wigl Sms Package` provides an easy-to-use service for sending SMS verificat
 - [Customization](#customization)
 - [Error Handling](#error-handling)
 - [Testing](#testing)
+
+## Package Structure
+```bash
+app/
+├── Contracts/                  # Contains interfaces like PackageResponseInterface
+├── Services/                   # Contains the logic for external services like SmsService
+│   └── SmsPackageResponse.php  # Your implementation of the PackageResponseInterface interface
+└── tests/                      # Contains the logic for testing the package
+    └── Feature/            
+    └── Unit/
+        └── SmsServiceTest.php  # Default test case to verify the service is ok      
+
+```
 
 ## Installation
 

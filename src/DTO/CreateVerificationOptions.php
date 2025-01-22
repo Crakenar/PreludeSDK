@@ -1,6 +1,9 @@
 <?php
-namespace Wigl\WiglSmsPackage\dto;
+namespace Wigl\WiglSmsPackage\DTO;
 
+/**
+ * Optional configuration that helps prelude with client language and anti-fraud.
+ */
 class CreateVerificationOptions
 {
     //Options
