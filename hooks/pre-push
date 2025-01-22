@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Run PHPUnit tests before allowing the push
+echo "Running PHPUnit tests..."
+
+# Run PHPUnit with vendor/bin/phpunit (or adjust to your PHPUnit installation path)
+vendor/bin/phpunit
+
+# If PHPUnit returns a non-zero exit code (i.e., test failure), prevent the push
+if [ $? -ne 0 ]; then
+    echo "Tests failed. Push aborted."
+    exit 1
+fi
+
+echo "All tests passed. Proceeding with push."
+exit 0

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# Check for any usage of 'dump()' or 'dd()' in the staged files
+echo "Checking for dump() and dd() calls..."
+
+# Find all staged PHP files (files added to the index) and search for dump() or dd()
+if git diff --cached --name-only --diff-filter=AM | grep -E '\.php$' | xargs grep -n -e 'dump(' -e 'dd('; then
+    echo "Error: Found 'dump()' or 'dd()' in your code. Please remove them before committing."
+    exit 1
+fi
+
+echo "No 'dump()' or 'dd()' calls found. Proceeding with commit."
+exit 0
