@@ -1,12 +1,13 @@
 <?php
 
-namespace MyName\SmsService;
+namespace Wigl\WiglSmsPackage;
 
 use Illuminate\Support\ServiceProvider;
+use Wigl\WiglSmsPackage\service\SmsService;
 
 class SmsServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
         $this->app->singleton(SmsService::class, function () {
             return new SmsService();

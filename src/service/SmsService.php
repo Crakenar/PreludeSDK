@@ -1,35 +1,40 @@
 <?php
 
-namespace Wigl\WiglSmsPackage;
+namespace Wigl\WiglSmsPackage\service;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
+use Psr\Http\Message\ResponseInterface;
+use Wigl\WiglSmsPackage\dto\CreateVerificationOptions;
+use Wigl\WiglSmsPackage\interface\SmsServiceInterface;
 
-class SmsService
+class SmsService implements SmsServiceInterface
 {
-    protected string|null $apiKey = null;
     protected bool $off = false;
-    protected mixed $ERROR_CODES = null;
+    private string|null $apiKey;
+    private bool $isServiceEnabled;
+    private array $errorCodes;
+    private Client $httpClient;
 
     //todo use config php
-    public const string URL_V2 = "https://api.prelude.dev/v2";
+    private const string URL_V2 = "https://api.prelude.dev/v2";
 
     public function __construct()
     {
         //Default SMS Service CONFIG
 //        $this->ERROR_CODES = config('constants.prelude_error_codes');
-        $this->off = config('sms.service_activated') || app()->env === 'testing';
-        $this->apiKey = config('sms.api_key');;;
+        $this->off = config('services.sms_service.service_activated') || app()->env === 'testing';
+        $this->apiKey = config('services.sms_service.api_key');
     }
 
-    public function handle(string $userPhoneNumber): bool
+    public function sendVerification(string $userPhoneNumber): bool
     {
 //        if ($this->off) {
 //            return true;
 //        }
         try {
-            $responseContent = json_decode($this->apiRequestCreateVerification($userPhoneNumber)->getBody()->getContents());
+            $responseContent = json_decode($this->createVerificationRequest($userPhoneNumber)->getBody()->getContents());
             //If id then it means a session is opened on Prelude side for this phone number => success
             if ($responseContent->id) {
                 Log::channel('sms_mode')->info('SMS successfully dispatched to ' . $userPhoneNumber);
@@ -49,7 +54,7 @@ class SmsService
             dd($exception);
             Log::channel('sms_mode')->error('Error with smsmode API request: ' . $exception->getMessage());
             // expect a code, message, doc_url
-            $this->formatPreludeError('account_invalid', $exception->getMessage());
+            $this->formatError('account_invalid', $exception->getMessage());
             return false;
         }
     }
@@ -57,18 +62,16 @@ class SmsService
     /**
      * This function use the Prelude API to send an SMS code to a phone number. A Session is created with the code / phone number on Prelude side
      * Atm we do not need to use a check code function because we have an api route ?? => ask Julien
-     * TODO OPTIONS :
-     *  - options.locale for message language BCP-47 format (en-GB, fr-FR etc...) => user->language ?
-     *  - options.custom_code to use a custom code instead of the one from Prelude ASk Julien how validate code is made
-     *      -> on refait tout le systeme et on laisse Prelude tout gerer ?
-     * TODO ANTI-FRAUD: need to add minimum these data for anti-fraud
-     *  signals.app_version
-     *  signals.device_id
-     *  signals.device_platform (ENUM : android, ios, ipados, tvos, web)
-     *  signals.ip
      * @throws GuzzleException
      */
-    private function apiRequestCreateVerification(string $phoneNumber): \Psr\Http\Message\ResponseInterface|string
+    /**
+     * Creates a verification request to the Prelude API.
+     *
+     * @param string $phoneNumber The recipient's phone number.
+     * @return ResponseInterface|string
+     * @throws GuzzleException
+     */
+    private function createVerificationRequest(string $phoneNumber, CreateVerificationOptions $options): ResponseInterface|string
     {
         $client = new Client();
         return $client->post(self::URL_V2 . '/verification', [
@@ -76,33 +79,30 @@ class SmsService
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
             ],
-            'json' => [
-                'target' => [
-                    'type' => 'phone_number',
-                    'value' => $phoneNumber,
+            'json' => array_merge(
+                [
+                    'target' => [
+                        'type' => 'phone_number',
+                        'value' => $phoneNumber,
+                    ],
                 ],
-//                'options' => [
-//                    'locale' => 'en-GB',
-//                    'custom_code' => '1234',
-//                ],
-//                'signals' => [
-//                    'app_version' => '1.0.0',
-//                    'device_id' => '123',
-//                    'device_platform' => 'android',
-//                    'ip' => '127.0.0.1',
-//                ],
-            ],
+                $options->toArray() // Merge in options and signals
+            ),
         ]);
     }
 
-    private function formatPreludeError(string $errorCode, string $message = 'Unknown error'): array
+    /**
+     * Formats an error response for Prelude API errors.
+     *
+     * @param string $errorCode The specific error code.
+     * @param string|null $message Additional error message details.
+     * @return array Formatted error data.
+     */
+    public function formatError(string $errorCode, ?string $message = 'Unknown error'): array
     {
-
-        $preludeErrorCodes = $this->ERROR_CODES['prelude_error_codes'];
-
         return [
-            'error_code' => $preludeErrorCodes[$errorCode] ?? 'Unknown error code.',
-            'errors' => $message
+            'error_code' => $this->errorCodes[$errorCode] ?? 'Unknown error code.',
+            'message' => $message,
         ];
     }
 }
