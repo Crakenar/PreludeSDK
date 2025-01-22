@@ -9,6 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Wigl\WiglSmsPackage\Contracts\SmsServiceInterface;
 use Wigl\WiglSmsPackage\DTO\CreateVerificationOptions;
 use Wigl\WiglSmsPackage\DTO\SmsPackageResponse;
+use Wigl\WiglSmsPackage\Utility\PhoneNumberValidator;
 
 class SmsService implements SmsServiceInterface
 {
@@ -23,7 +24,7 @@ class SmsService implements SmsServiceInterface
     public function __construct()
     {
         //Default SMS Service CONFIG
-        $this->errorCodes = config('error-constants.sms_error_codes');
+        $this->errorCodes = config('constants.sms_error_codes');
         $this->isServiceEnabled = config('services.sms_service.service_activated') || app()->env === 'testing';
         $this->apiKey = config('services.sms_service.api_key');
         $this->client = new Client();
@@ -47,6 +48,10 @@ class SmsService implements SmsServiceInterface
 //        if ($this->isServiceEnabled) {
 //            return true;
 //        }
+        if (!PhoneNumberValidator::isValidE164($userPhoneNumber)) {
+            $errorsFormatted = $this->formatError($this->errorCodes['invalid_phone_number'], 'Invalid phone number');
+            return new SmsPackageResponse(false, $errorsFormatted);
+        }
         try {
             $responseContent = json_decode($this->createVerificationRequest($userPhoneNumber, $options)->getBody()->getContents());
             if ($responseContent->id) {
@@ -62,8 +67,8 @@ class SmsService implements SmsServiceInterface
             $responseBody = json_decode($response->getBody()->getContents(), true);
             $errorCode = $responseBody['code'] ?? 'generic';
 
-            Log::channel('sms_mode')->error('Error with Prelude API request: ' . $exception->getMessage());
-            $errorsFormatted = $this->formatError($errorCode, $exception->getMessage());
+            Log::channel('sms_mode')->error('Error with Prelude API request: ' . $responseBody['message']);
+            $errorsFormatted = $this->formatError($errorCode, $responseBody['message']);
             return new SmsPackageResponse(false, $errorsFormatted);
         }
     }

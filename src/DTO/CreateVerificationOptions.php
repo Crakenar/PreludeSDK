@@ -118,7 +118,7 @@ class CreateVerificationOptions
 
     public function toArray(): array
     {
-        return [
+        return array_filter([
             'options' => array_filter([
                 'locale' => $this->locale,
                 'custom_code' => $this->customCode,
@@ -130,6 +130,6 @@ class CreateVerificationOptions
                 'device_platform' => $this->devicePlatform,
                 'ip' => $this->ip,
             ], fn($value) => $value !== null),
-        ];
+        ], fn($value) => !empty($value)); // Remove empty 'options' or 'signals'
     }
 }
