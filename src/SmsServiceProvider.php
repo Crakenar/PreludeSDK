@@ -1,9 +1,9 @@
 <?php
 
-namespace Wigl\WiglSmsPackage;
+namespace Prelude\SmsSDK;
 
 use Illuminate\Support\ServiceProvider;
-use Wigl\WiglSmsPackage\Services\SmsService;
+use Prelude\SmsSDK\Services\SmsService;
 
 class SmsServiceProvider extends ServiceProvider
 {
@@ -18,7 +18,8 @@ class SmsServiceProvider extends ServiceProvider
     {
         // Publish configuration if needed
         $this->publishes([
-            __DIR__.'/../config/sms.php' => config_path('sms.php'),
+            __DIR__.'/../config/services.php' => config_path('services.php'),
+            __DIR__.'/../config/constants.php.php' => config_path('constants.php'),
         ]);
     }
 }

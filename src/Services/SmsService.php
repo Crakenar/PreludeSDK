@@ -1,17 +1,17 @@
 <?php
 
-namespace Wigl\WiglSmsPackage\Services;
+namespace Prelude\SmsSDK\Services;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
 use Psr\Http\Message\ResponseInterface;
-use Wigl\WiglSmsPackage\Contracts\SmsServiceInterface;
-use Wigl\WiglSmsPackage\DTO\CreateVerificationOptions;
-use Wigl\WiglSmsPackage\DTO\SmsPackageResponse;
-use Wigl\WiglSmsPackage\Enums\VerificationCheckCodeRequestStatus;
-use Wigl\WiglSmsPackage\Enums\VerificationRequestStatus;
-use Wigl\WiglSmsPackage\Utility\PhoneNumberValidator;
+use Prelude\SmsSDK\Contracts\SmsServiceInterface;
+use Prelude\SmsSDK\DTO\CreateVerificationOptions;
+use Prelude\SmsSDK\DTO\SmsPackageResponse;
+use Prelude\SmsSDK\Enums\VerificationCheckCodeRequestStatus;
+use Prelude\SmsSDK\Enums\VerificationRequestStatus;
+use Prelude\SmsSDK\Utility\PhoneNumberValidator;
 
 class SmsService implements SmsServiceInterface
 {

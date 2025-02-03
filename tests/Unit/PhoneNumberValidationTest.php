@@ -1,7 +1,7 @@
 <?php
 
 use Tests\TestCase;
-use Wigl\WiglSmsPackage\Utility\PhoneNumberValidator;
+use Prelude\SmsSDK\Utility\PhoneNumberValidator;
 
 class PhoneNumberValidationTest extends TestCase
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Wigl\WiglSmsPackage\DTO;
+namespace Prelude\SmsSDK\DTO;
 
 /**
  * Optional configuration that helps prelude with client language and anti-fraud.

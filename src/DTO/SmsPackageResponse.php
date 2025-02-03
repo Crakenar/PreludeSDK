@@ -1,8 +1,7 @@
 <?php
+namespace Prelude\SmsSDK\DTO;
 
-namespace Wigl\WiglSmsPackage\DTO;
-
-use Wigl\WiglSmsPackage\Contracts\PackageResponseInterface;
+use Prelude\SmsSDK\Contracts\PackageResponseInterface;
 
 /**
  * Class SmsPackageResponse

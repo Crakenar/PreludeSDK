@@ -1,15 +1,10 @@
 {
-    "name": "wigl/wigl-sms-package",
-    "description": "Package for wigl app to handle SMS",
+    "name": "prelude/prelude-sdk",
+    "description": "Prelude API Sdk",
     "type": "library",
     "require": {
         "php": "^8.3",
         "laravel/framework": "^10.10 || ^11.39"
-    },
-    "autoload": {
-        "psr-4": {
-            "Wigl\\WiglSmsPackage\\": "src/"
-        }
     },
     "authors": [
         {

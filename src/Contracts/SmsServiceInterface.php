@@ -1,11 +1,11 @@
 <?php
 
-namespace Wigl\WiglSmsPackage\Contracts;
+namespace Prelude\SmsSDK\Contracts;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
-use Wigl\WiglSmsPackage\DTO\CreateVerificationOptions;
-use Wigl\WiglSmsPackage\DTO\SmsPackageResponse;
+use Prelude\SmsSDK\DTO\CreateVerificationOptions;
+use Prelude\SmsSDK\DTO\SmsPackageResponse;
 
 interface SmsServiceInterface
 {

@@ -12,8 +12,8 @@ use Mockery;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Tests\TestCase;
-use Wigl\WiglSmsPackage\DTO\CreateVerificationOptions;
-use Wigl\WiglSmsPackage\Services\SmsService;
+use Prelude\SmsSDK\DTO\CreateVerificationOptions;
+use Prelude\SmsSDK\Services\SmsService;
 
 class SmsServiceTest extends TestCase
 {

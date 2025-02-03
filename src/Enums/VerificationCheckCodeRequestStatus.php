@@ -1,6 +1,6 @@
 <?php
 
-namespace Wigl\WiglSmsPackage\Enums;
+namespace Prelude\SmsSDK\Enums;
 
 enum VerificationCheckCodeRequestStatus: string
 {

@@ -1,6 +1,6 @@
-# Wigl Sms Package
+# Prelude PHP SDK
 
-The `Wigl Sms Package` provides an easy-to-use service for sending SMS verifications through the Prelude API. This package allows developers to send SMS verification codes to users' phone numbers and manage options and signals for enhanced functionality.
+The `Prelude PHP SDK` provides an easy-to-use service for sending SMS verifications through the Prelude API. This package allows developers to send SMS verification codes to users' phone numbers and manage options and signals for enhanced functionality.
 
 ## Table of Contents
 
@@ -39,7 +39,7 @@ src/
 To install the package, you can use Composer:
 
 ```bash
-composer require wigl/wigl-sms-package
+composer require prelude/prelude-sdk
 ```
 
 ## Configuration
@@ -49,7 +49,7 @@ composer require wigl/wigl-sms-package
 Once the package is installed, you can publish the config file to your application by running:
 
 ```bash
-php artisan vendor:publish --provider="Wigl\WiglSmsPackage\WiglSmsPackageServiceProvider" --tag="config"
+php artisan vendor:publish --provider="Prelude\SmsSDK\SmsPackageServiceProvider" --tag="config"
 ```
 This will publish the configuration file config/services.php.
 
@@ -74,8 +74,8 @@ Ensure that the environment variables (PRELUDE_API_KEY, SMS_SERVICE_ACTIVATED) a
 To send an SMS verification request to a phone number, use the createVerificationRequest method. This method accepts the phone number and an instance of VerificationOptions.
 
 ```php
-use Wigl\WiglSmsPackage\SmsService;
-use Wigl\WiglSmsPackage\DTO\VerificationOptions;
+use Prelude\SmsSDK\SmsService;
+use Prelude\SmsSDK\DTO\VerificationOptions;
 
 $smsService = new SmsService();
 
@@ -135,7 +135,7 @@ These values will be sent along with the phone number to the Prelude API.
 Sends a request to verify the provided code for a phone number. This method accepts the phone number and a code string.
 
 ```php
-use Wigl\WiglSmsPackage\SmsService;
+use Prelude\SmsSDK\SmsService;
 
 $smsService = new SmsService();
 

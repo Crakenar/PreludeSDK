@@ -1,6 +1,6 @@
 <?php
 
-namespace Wigl\WiglSmsPackage\Contracts;
+namespace Prelude\SmsSDK\Contracts;
 
 /**
  * Interface PackageResponseInterface

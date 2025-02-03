@@ -1,6 +1,6 @@
 <?php
 
-namespace Wigl\WiglSmsPackage\Utility;
+namespace Prelude\SmsSDK\Utility;
 
 class PhoneNumberValidator
 {
