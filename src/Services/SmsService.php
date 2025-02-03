@@ -122,6 +122,13 @@ class SmsService implements SmsServiceInterface
                 Log::channel('sms_mode')->info('SMS Code validated successfully for ' . $userPhoneNumber);
                 return new SmsPackageResponse();
             }
+
+            if  ($responseContent->id && $responseContent->status === VerificationCheckCodeRequestStatus::EXPIRED_OR_NOT_FOUND->value) {
+                $message = 'SMS Code expired or not found  for ' . $userPhoneNumber;
+                Log::channel('sms_mode')->info($message);
+                $errorsFormatted = $this->formatError($this->errorCodes['expired_or_not_found'], $message);
+                return new SmsPackageResponse(false, $errorsFormatted);
+            }
             return $this->handleApiException($userPhoneNumber);
 
         } catch (GuzzleException $exception) {

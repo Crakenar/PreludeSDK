@@ -35,6 +35,7 @@ return [
         'spending_limit_exceeded' => 'sms-service-0300',
         'custom_code_not_allowed' => 'sms-service-0310',
         'code_empty' => 'sms-service-0320',
+        'expired_or_not_found' => 'sms-service-0330',
     ],
 ];
 
