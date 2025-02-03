@@ -16,6 +16,11 @@
         "orchestra/testbench": "^9.9",
         "mockery/mockery": "^1.6"
     },
+    "autoload": {
+        "psr-4": {
+            "Prelude\\SmsSDK\\": "src/"
+        }
+    },
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
